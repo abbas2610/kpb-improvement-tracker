@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPB Logistik App — Project Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #1A4FB5; --blue-mid: #2563EB; --blue-light: #DBEAFE; --blue-pale: #EFF6FF;
+  --yellow: #F59E0B; --yellow-light: #FEF3C7; --yellow-pale: #FFFBEB; --yellow-dark: #B45309;
+  --bg: #F0F4FF; --surface: #FFFFFF; --surface2: #F8FAFF;
+  --border: #E2E8F0; --border2: #CBD5E1;
+  --text1: #0F172A; --text2: #475569; --text3: #94A3B8;
+  --green: #059669; --green-bg: #D1FAE5;
+  --radius: 10px; --radius-lg: 16px; --radius-xl: 20px;
+  --font: 'Plus Jakarta Sans', sans-serif; --mono: 'JetBrains Mono', monospace;
+  --shadow: 0 1px 3px rgba(26,79,181,0.08), 0 4px 16px rgba(26,79,181,0.06);
+  --shadow-md: 0 4px 12px rgba(26,79,181,0.12), 0 8px 32px rgba(26,79,181,0.08);
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text1); min-height: 100vh; font-size: 14px; }
+
+/* HEADER */
+.header { background: var(--blue); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 32px; height: 32px; background: var(--yellow); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--blue); }
+.header-title { font-size: 15px; font-weight: 600; color: #fff; }
+.header-sub { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.sync-status { font-size: 11px; color: rgba(255,255,255,0.6); font-family: var(--mono); display: flex; align-items: center; gap: 6px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+.sync-dot.syncing { background: var(--yellow); animation: pulse 1s ease-in-out infinite; }
+.sync-dot.error { background: #f87171; animation: none; }
+.btn-update { background: var(--yellow); color: var(--blue); border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; transition: background 0.15s, transform 0.1s; }
+.btn-update:hover { background: #FBBF24; }
+.btn-update:active { transform: scale(0.97); }
+
+/* MAIN */
+.main { max-width: 960px; margin: 0 auto; padding: 28px 24px 60px; }
+
+/* LOADING SCREEN */
+.loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; }
+.loading-spinner { width: 40px; height: 40px; border: 3px solid var(--blue-light); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--text2); }
+
+/* DASHBOARD */
+.dashboard { background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); padding: 28px 32px; margin-bottom: 24px; border: 1px solid var(--border); }
+.dashboard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 20px; }
+.dash-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-mid); margin-bottom: 4px; }
+.dash-pct { font-size: 56px; font-weight: 700; color: var(--blue); line-height: 1; letter-spacing: -2px; }
+.dash-pct span { font-size: 24px; font-weight: 500; color: var(--text3); letter-spacing: 0; }
+.dash-status-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.8)} }
+.status-dot.done { background: var(--green); animation: none; }
+.status-dot.idle { background: var(--text3); animation: none; }
+.dash-status-text { font-size: 13px; color: var(--text2); font-weight: 500; }
+.dash-stats { display: flex; gap: 12px; flex-shrink: 0; }
+.stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; text-align: center; min-width: 90px; }
+.stat-num { font-size: 24px; font-weight: 700; color: var(--blue); line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--text3); margin-top: 4px; font-weight: 500; }
+.stat-card.yellow .stat-num { color: var(--yellow-dark); }
+.stat-card.green .stat-num { color: var(--green); }
+.progress-track { height: 10px; background: var(--blue-light); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue) 0%, var(--blue-mid) 100%); border-radius: 99px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.progress-phases { display: flex; margin-top: 8px; gap: 3px; }
+.phase-chip { flex: 1; height: 4px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
+.phase-chip.active { background: var(--yellow); }
+.phase-chip.done { background: var(--blue-mid); }
+
+/* PHASE BLOCKS */
+.section-title { font-size: 13px; font-weight: 600; color: var(--text2); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 14px; }
+.phase-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 14px; overflow: hidden; box-shadow: var(--shadow); }
+.phase-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; transition: background 0.15s; border-bottom: 1px solid transparent; }
+.phase-header:hover { background: var(--surface2); }
+.phase-header.open { border-bottom-color: var(--border); }
+.phase-num { width: 28px; height: 28px; border-radius: 8px; background: var(--blue-pale); color: var(--blue); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.phase-name { font-size: 14px; font-weight: 600; flex: 1; }
+.phase-progress-mini { display: flex; align-items: center; gap: 8px; }
+.phase-bar-mini { width: 80px; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.phase-bar-fill { height: 100%; background: var(--blue-mid); border-radius: 99px; transition: width 0.4s; }
+.phase-pct-mini { font-size: 12px; font-weight: 600; color: var(--blue); min-width: 32px; text-align: right; font-family: var(--mono); }
+.phase-chevron { width: 18px; height: 18px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+.phase-chevron.open { transform: rotate(180deg); }
+.steps-wrap { display: none; padding: 8px 12px 12px; }
+.steps-wrap.open { display: block; }
+
+/* STEP ROW */
+.step-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: var(--radius); transition: background 0.15s; margin-bottom: 2px; cursor: pointer; position: relative; }
+.step-row:hover { background: var(--surface2); }
+.step-saving::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); background: rgba(37,99,235,0.04); pointer-events: none; }
+.step-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border2); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: white; cursor: pointer; }
+.step-check:hover { border-color: var(--blue-mid); background: var(--blue-pale); }
+.step-check.checked { background: var(--blue); border-color: var(--blue); }
+.step-check.checked::after { content: ''; width: 10px; height: 6px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translateY(-1px); display: block; }
+.step-body { flex: 1; min-width: 0; }
+.step-title { font-size: 13px; font-weight: 600; color: var(--text1); margin-bottom: 3px; }
+.step-title.done { color: var(--text3); text-decoration: line-through; }
+.step-desc { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 6px; }
+.step-desc.done { color: var(--text3); }
+.step-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+.tag-time { background: var(--yellow-pale); color: var(--yellow-dark); border: 1px solid var(--yellow-light); }
+.tag-done { background: var(--green-bg); color: var(--green); }
+.tag-free { background: var(--green-bg); color: var(--green); border: 1px solid #A7F3D0; }
+.tag-hint { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-light); }
+.tag-updatedby { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); font-weight: 400; font-style: italic; }
+
+/* DETAIL PANEL */
+.step-detail { display: none; margin: 4px 0 8px 34px; background: var(--blue-pale); border: 1px solid var(--blue-light); border-radius: var(--radius); padding: 16px 18px; animation: slideDown 0.18s ease; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.step-detail.open { display: block; }
+.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.detail-title { font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.07em; }
+.detail-close { font-size: 11px; color: var(--text3); cursor: pointer; background: none; border: none; font-family: var(--font); padding: 0; }
+.detail-close:hover { color: var(--blue); }
+.detail-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.detail-list li { font-size: 12px; color: var(--text1); padding-left: 20px; position: relative; line-height: 1.6; }
+.detail-list li::before { content: "→"; position: absolute; left: 0; color: var(--blue-mid); font-size: 11px; top: 2px; font-weight: 600; }
+.detail-list code { font-family: var(--mono); font-size: 11px; background: rgba(26,79,181,0.12); color: var(--blue); padding: 1px 6px; border-radius: 4px; }
+
+/* NOTE */
+.step-note-wrap { margin-top: 6px; }
+.step-notes { padding: 8px 10px; background: var(--yellow-pale); border: 1px solid var(--yellow-light); border-radius: 6px; display: none; margin-bottom: 4px; }
+.step-notes.visible { display: block; }
+.step-notes-input { width: 100%; background: transparent; border: none; outline: none; font-family: var(--font); font-size: 11px; color: var(--yellow-dark); font-style: italic; resize: none; min-height: 20px; }
+.step-add-note { font-size: 11px; color: var(--text3); cursor: pointer; background: none; border: none; font-family: var(--font); padding: 0; display: inline-block; transition: color 0.15s; }
+.step-add-note:hover { color: var(--blue-mid); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius-xl); padding: 28px 32px; max-width: 460px; width: 100%; box-shadow: var(--shadow-md); }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--text1); margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.modal-field { margin-bottom: 14px; }
+.modal-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; display: block; }
+.modal-input { width: 100%; padding: 9px 13px; border: 1px solid var(--border2); border-radius: var(--radius); font-family: var(--font); font-size: 13px; color: var(--text1); background: white; outline: none; transition: border-color 0.15s; }
+.modal-input:focus { border-color: var(--blue-mid); }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-cancel { flex:1; padding:10px; border:1px solid var(--border2); border-radius:var(--radius); background:white; font-family:var(--font); font-size:13px; font-weight:600; color:var(--text2); cursor:pointer; }
+.btn-cancel:hover { background: var(--surface2); }
+.btn-save { flex:2; padding:10px; border:none; border-radius:var(--radius); background:var(--blue); font-family:var(--font); font-size:13px; font-weight:600; color:white; cursor:pointer; }
+.btn-save:hover { background: var(--blue-mid); }
+
+.footer { text-align: center; padding: 16px; font-size: 11px; color: var(--text3); font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-mark">KPB</div>
+    <div>
+      <div class="header-title">KPB Logistik App</div>
+      <div class="header-sub">Project Development Tracker</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncText">Menghubungkan...</span>
+    </div>
+    <button class="btn-update" onclick="openModal()">+ Update Progress</button>
+  </div>
+</div>
+
+<div class="main" id="mainContent">
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Memuat data dari Supabase...</div>
+  </div>
+
+  <div id="appContent" style="display:none">
+    <div class="dashboard">
+      <div class="dashboard-top">
+        <div>
+          <div class="dash-label">Overall Progress</div>
+          <div class="dash-pct" id="pctEl">0<span>%</span></div>
+          <div class="dash-status-row">
+            <div class="status-dot" id="statusDot"></div>
+            <div class="dash-status-text" id="statusText">Memuat...</div>
+          </div>
+        </div>
+        <div class="dash-stats">
+          <div class="stat-card green"><div class="stat-num" id="doneCount">0</div><div class="stat-lbl">Selesai</div></div>
+          <div class="stat-card yellow"><div class="stat-num" id="ongoingCount">0</div><div class="stat-lbl">On-going</div></div>
+          <div class="stat-card"><div class="stat-num" id="todoCount">14</div><div class="stat-lbl">Belum mulai</div></div>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-phases" id="phaseBars"></div>
+    </div>
+
+    <div class="section-title">Rincian per Langkah — klik baris untuk lihat instruksi detail</div>
+    <div id="phasesEl"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Update Progress</div>
+    <div class="modal-sub">Siapa yang melakukan update ini?</div>
+    <div class="modal-field">
+      <label class="modal-label">Nama</label>
+      <select class="modal-input" id="modalWho">
+        <option value="Abbas">Abbas (Project Manager)</option>
+        <option value="Jose">Jose (Direktur KPB)</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Catatan (opsional)</label>
+      <input class="modal-input" id="modalNote" type="text" placeholder="Misal: Fase 1 selesai, mulai build database...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" onclick="saveUpdate()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">KPB Logistik App · AW Tech · Realtime sync via Supabase</div>
+
+<script>
+// ── KONFIGURASI SUPABASE ──
+// Ganti ANON_KEY dengan anon key baru kamu setelah di-regenerate
+const SUPABASE_URL = 'https://grtmlqicrfniuxmnwnpp.supabase.co';
+const ANON_KEY     = 'GANTI_DENGAN_ANON_KEY_BARU_KAMU';
+
+const headers = {
+  'apikey': ANON_KEY,
+  'Authorization': 'Bearer ' + ANON_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+async function sbGet(table, params='') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, { headers });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPatch(table, id, body) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH', headers, body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbInsert(table, body) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST', headers, body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+// ── DATA STEPS ──
+const PHASES = [
+  {
+    name: "Setup akun & install Claude Code",
+    steps: [
+      { id:1, title:"Buat akun GitHub, Supabase, Vercel", time:"30 menit", free:true,
+        desc:"Tiga fondasi project: GitHub = kode, Supabase = database, Vercel = hosting.",
+        detail:["Buka <strong>github.com</strong> → Sign up → buat repository private bernama <code>kpb-logistik-app</code>","Buka <strong>supabase.com</strong> → login pakai akun GitHub → New project → region Singapore → simpan database password","Buka <strong>vercel.com</strong> → Sign up with GitHub → akan dipakai nanti saat deploy"] },
+      { id:2, title:"Install Node.js & Claude Code", time:"15–30 menit", free:false,
+        desc:"Install Node.js lalu satu command untuk install Claude Code global.",
+        detail:["Download Node.js di <strong>nodejs.org</strong> → pilih versi LTS → install seperti software biasa","Buka terminal (Command Prompt di Windows / Terminal di Mac)","Jalankan: <code>npm install -g @anthropic-ai/claude-code</code>","Login: <code>claude login</code> → akan buka browser untuk autentikasi","Test: ketik <code>claude</code> di terminal → muncul prompt → setup selesai"] },
+      { id:3, title:"Test Claude Code — percobaan pertama", time:"15 menit", free:false,
+        desc:"Validasi bahwa Claude Code bisa baca, tulis, dan jalankan perintah di komputer Jose.",
+        detail:["Buat folder: <code>mkdir test-project && cd test-project</code>","Ketik <code>claude</code> untuk masuk sesi","Instruksi: <em>'Buat file bernama hello.txt berisi teks: Selamat datang di KPB'</em>","Kalau file muncul di folder, setup sudah beres","Hapus folder test, lanjut ke Fase 2"] }
+    ]
+  },
+  {
+    name: "Init project & database schema",
+    steps: [
+      { id:4, title:"Init project Next.js via Claude Code", time:"30–60 menit", free:false,
+        desc:"Claude Code generate project Next.js lengkap dengan Tailwind dan koneksi Supabase.",
+        detail:["Buat folder: <code>mkdir kpb-logistik-app && cd kpb-logistik-app</code>","Ketik <code>claude</code> untuk mulai sesi","Instruksi: <em>'Init project Next.js dengan Tailwind CSS dan App Router. Setup koneksi ke Supabase.'</em>","Masukkan SUPABASE_URL dan ANON_KEY saat diminta","Claude Code akan jalankan semua npm command dan buat file konfigurasi otomatis"] },
+      { id:5, title:"Generate database schema dari mockup", time:"1–2 jam", free:false,
+        desc:"Claude Code analisis mockup KPB v5.1 dan generate SQL schema untuk Supabase.",
+        detail:["Share file mockup KPB v5.1 ke Claude Code lalu instruksikan: <em>'Dari mockup ini, buatkan SQL schema PostgreSQL untuk Supabase.'</em>","Tabel wajib: <code>dokumen_rute</code>, <code>detail_rute</code>, <code>customer</code>, <code>produk</code>, <code>packing_list</code>, <code>loading_log</code>, <code>retur</code>, <code>cash_advance</code>, <code>notif_log</code>","Claude Code generate file <code>schema.sql</code> → paste di Supabase SQL Editor → Run","Verifikasi di Table Editor: semua tabel harus muncul"] },
+      { id:6, title:"Push ke GitHub & setup Vercel auto-deploy", time:"30 menit", free:false,
+        desc:"Claude Code jalankan git commands otomatis. App langsung live di URL sementara.",
+        detail:["Di Claude Code: <em>'Push project ini ke GitHub repo kpb-logistik-app. Init git, commit semua, push ke main.'</em>","Buka Vercel → New Project → Import from GitHub → pilih repo","Tambahkan Environment Variables (SUPABASE_URL dan ANON_KEY)","Deploy → tunggu 2–3 menit → app live di <code>kpb-logistik-app.vercel.app</code>"] }
+    ]
+  },
+  {
+    name: "Build fitur dengan Claude Code",
+    steps: [
+      { id:7, title:"Build 7 modul aplikasi", time:"8–14 jam total", free:false,
+        desc:"Dokumen Rute, Kanban, Packing List, Driver View, Loading Log, Retur, Dashboard Admin.",
+        detail:["<strong>Modul 1 — Dokumen Rute:</strong> form buat rute baru, pilih driver & kendaraan, list customer + produk","<strong>Modul 2 — Kanban board:</strong> 4 kolom status rute, real-time update","<strong>Modul 3 — Packing checklist:</strong> centang per item, submit → update status","<strong>Modul 4 — Driver view:</strong> mobile-friendly, input retur + foto, cash advance","<strong>Modul 5 — Loading & departure log:</strong> timestamp loading & keberangkatan","<strong>Modul 6 — Retur management:</strong> input per customer, foto, approval PPIC","<strong>Modul 7 — Dashboard admin:</strong> ringkasan harian, status semua rute, log notif WA"] },
+      { id:8, title:"Setup autentikasi & role-based access", time:"2–3 jam", free:false,
+        desc:"Login dengan Supabase Auth. Tiga role: admin (PPIC), gudang, driver.",
+        detail:["Instruksi: <em>'Tambahkan login Supabase Auth. 3 role: admin, gudang, driver. Redirect ke halaman sesuai role. Buat middleware proteksi semua halaman.'</em>","Tambah Row Level Security di semua tabel","Test dengan 3 akun dummy berbeda role"] },
+      { id:9, title:"Integrasi notifikasi WhatsApp via Fonnte", time:"2–3 jam", free:false,
+        desc:"7 trigger WA otomatis untuk semua event penting di logistik KPB.",
+        detail:["Daftar di <strong>fonnte.com</strong>, scan QR dengan nomor WA KPB (~Rp50rb/bulan)","Copy API Key dari dashboard Fonnte","Instruksi: <em>'Buat modul notif WA via Fonnte. 7 trigger: rute baru, packing selesai, loading selesai, berangkat, retur, cash advance, rute selesai.'</em>","Tambah halaman log notifikasi di dashboard admin"] }
+    ]
+  },
+  {
+    name: "Testing & production deploy",
+    steps: [
+      { id:10, title:"Bug fixing loop dengan Claude Code", time:"2–3 jam", free:false,
+        desc:"Paste error ke Claude Code — dia fix langsung di file yang tepat.",
+        detail:["Buka app → temukan error → kembali ke Claude Code","Paste error: <em>'Ada error ini: [paste]. Tolong fix.'</em>","Untuk error browser: <code>F12</code> → Console → copy pesan merah → paste ke Claude Code","Vercel auto-redeploy setiap ada perubahan → refresh browser untuk test ulang"] },
+      { id:11, title:"UAT bersama tim KPB", time:"2–3 jam", free:false,
+        desc:"Test skenario nyata bersama PPIC, tim gudang, dan satu driver.",
+        detail:["Undang 1 PPIC, 1 gudang, 1 driver untuk sesi testing","<strong>PPIC:</strong> buat Dokumen Rute → assign driver → cek notif WA diterima","<strong>Gudang:</strong> buka packing list → centang → submit → cek status kanban","<strong>Driver:</strong> buka di HP → lihat rute → input retur + foto → cash advance","Catat bug → fix via Claude Code → redeploy → test ulang"] },
+      { id:12, title:"Custom domain (opsional)", time:"20 menit", free:false,
+        desc:"Ganti URL dari vercel.app ke domain KPB sendiri.",
+        detail:["Beli domain di Niagahoster (~Rp150rb/tahun)","Vercel → Settings → Domains → Add domain","Tambahkan CNAME record di panel domain","Tunggu propagasi 5–30 menit → domain aktif dengan HTTPS otomatis"] }
+    ]
+  },
+  {
+    name: "Go-live & onboarding tim",
+    steps: [
+      { id:13, title:"Buat akun user & assign role", time:"30 menit", free:false,
+        desc:"Buat akun untuk setiap anggota tim KPB yang akan pakai aplikasi.",
+        detail:["Supabase → Authentication → Users → Invite user","Buat akun untuk PPIC, gudang, dan setiap driver","Update kolom <code>role</code> di tabel <code>profiles</code> untuk setiap user","Test login masing-masing akun → pastikan redirect ke halaman yang benar"] },
+      { id:14, title:"Training & parallel run 1–2 minggu", time:"1–2 minggu", free:false,
+        desc:"Training per role, parallel run dulu sebelum full go-live.",
+        detail:["<strong>Training PPIC (30 mnt):</strong> buat rute, assign driver, monitor kanban","<strong>Training Gudang (30 mnt):</strong> packing list, centang, submit loading","<strong>Training Driver (20 mnt):</strong> login di HP, input retur + foto, cash advance","<strong>Minggu 1:</strong> app + proses lama berjalan bersamaan. Bandingkan data tiap hari.","<strong>Minggu 2:</strong> jika data konsisten, stop proses manual. App jadi sistem utama."] }
+    ]
+  }
+];
+
+// ── STATE ──
+let dbState = {};    // { stepId: { checked, note, updated_by, updated_at } }
+let currentUpdater = 'Jose';
+const openDetails = new Set();
+let noteTimers = {};
+
+function setSyncStatus(status, text) {
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncText');
+  dot.className = 'sync-dot' + (status === 'syncing' ? ' syncing' : status === 'error' ? ' error' : '');
+  txt.textContent = text;
+}
+
+// ── LOAD FROM SUPABASE ──
+async function loadFromSupabase() {
+  try {
+    setSyncStatus('syncing', 'Memuat data...');
+    const rows = await sbGet('tracker_steps', '?order=id.asc');
+    dbState = {};
+    rows.forEach(r => {
+      dbState[r.id] = { checked: r.checked, note: r.note, updated_by: r.updated_by, updated_at: r.updated_at };
+    });
+    setSyncStatus('ok', 'Tersinkron');
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    render();
+  } catch(e) {
+    setSyncStatus('error', 'Gagal koneksi');
+    document.getElementById('loadingScreen').innerHTML =
+      `<div style="text-align:center;padding:40px">
+        <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+        <div style="font-size:14px;font-weight:600;color:#DC2626;margin-bottom:8px">Gagal terhubung ke Supabase</div>
+        <div style="font-size:12px;color:#475569;margin-bottom:16px">Pastikan ANON_KEY sudah diisi di file HTML dan schema SQL sudah dijalankan di Supabase.</div>
+        <button onclick="location.reload()" style="padding:8px 20px;background:#1A4FB5;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px">Coba Lagi</button>
+      </div>`;
+  }
+}
+
+// ── SAVE STEP TO SUPABASE ──
+async function saveStep(id, data) {
+  setSyncStatus('syncing', 'Menyimpan...');
+  try {
+    await sbPatch('tracker_steps', id, {
+      ...data,
+      updated_at: new Date().toISOString(),
+      updated_by: currentUpdater
+    });
+    dbState[id] = { ...dbState[id], ...data, updated_by: currentUpdater, updated_at: new Date().toISOString() };
+    setSyncStatus('ok', 'Tersimpan');
+    render();
+  } catch(e) {
+    setSyncStatus('error', 'Gagal simpan');
+  }
+}
+
+// ── RENDER ──
+function allSteps() { return PHASES.flatMap(p => p.steps); }
+function doneCount() { return allSteps().filter(s => dbState[s.id]?.checked).length; }
+function pct() { return Math.round((doneCount() / 14) * 100); }
+function phaseProgress(phase) {
+  const done = phase.steps.filter(s => dbState[s.id]?.checked).length;
+  return { done, total: phase.steps.length, pct: Math.round((done / phase.steps.length) * 100) };
+}
+
+function render() {
+  const done = doneCount(), p = pct();
+  document.getElementById('pctEl').innerHTML = `${p}<span>%</span>`;
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('ongoingCount').textContent = (done > 0 && done < 14) ? 1 : 0;
+  document.getElementById('todoCount').textContent = 14 - done - (done > 0 && done < 14 ? 1 : 0);
+  document.getElementById('progressFill').style.width = p + '%';
+
+  const dot = document.getElementById('statusDot'), txt = document.getElementById('statusText');
+  if (p === 0) { dot.className = 'status-dot idle'; txt.textContent = 'Belum dimulai'; }
+  else if (p === 100) { dot.className = 'status-dot done'; txt.textContent = 'Project selesai!'; }
+  else { dot.className = 'status-dot'; txt.textContent = `Sedang berjalan — ${14 - done} langkah lagi`; }
+
+  document.getElementById('phaseBars').innerHTML = PHASES.map((ph, i) => {
+    const prog = phaseProgress(ph);
+    let cls = 'phase-chip';
+    if (prog.done === prog.total) cls += ' done';
+    else if (prog.done > 0) cls += ' active';
+    return `<div class="${cls}" title="Fase ${i + 1}: ${prog.done}/${prog.total}"></div>`;
+  }).join('');
+
+  renderPhases();
+}
+
+function renderPhases() {
+  const el = document.getElementById('phasesEl');
+  el.innerHTML = '';
+  const firstIncomplete = PHASES.findIndex(ph => phaseProgress(ph).done < ph.steps.length);
+
+  PHASES.forEach((phase, pi) => {
+    const prog = phaseProgress(phase);
+    const isOpen = pi === firstIncomplete;
+    const block = document.createElement('div'); block.className = 'phase-block';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'phase-header' + (isOpen ? ' open' : '');
+    hdr.innerHTML = `
+      <div class="phase-num">F${pi + 1}</div>
+      <div class="phase-name">${phase.name}</div>
+      <div class="phase-progress-mini">
+        <div class="phase-bar-mini"><div class="phase-bar-fill" style="width:${prog.pct}%"></div></div>
+        <div class="phase-pct-mini">${prog.pct}%</div>
+      </div>
+      <svg class="phase-chevron ${isOpen ? 'open' : ''}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 8l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'steps-wrap' + (isOpen ? ' open' : '');
+
+    phase.steps.forEach(step => {
+      const sd = dbState[step.id] || {};
+      const isDone = !!sd.checked;
+      const note = sd.note || '';
+      const updatedBy = sd.updated_by || '';
+      const detailOpen = openDetails.has(step.id);
+
+      const row = document.createElement('div'); row.className = 'step-row';
+      row.innerHTML = `
+        <div class="step-check ${isDone ? 'checked' : ''}" id="chk-${step.id}"></div>
+        <div class="step-body">
+          <div class="step-title ${isDone ? 'done' : ''}">${step.title}</div>
+          <div class="step-desc ${isDone ? 'done' : ''}">${step.desc}</div>
+          <div class="step-meta">
+            <span class="tag tag-time">⏱ ${step.time}</span>
+            ${step.free ? '<span class="tag tag-free">Gratis</span>' : ''}
+            ${isDone ? `<span class="tag tag-done">✓ Selesai</span>` : '<span class="tag tag-hint">Klik untuk instruksi detail ↓</span>'}
+            ${updatedBy ? `<span class="tag tag-updatedby">oleh ${updatedBy}</span>` : ''}
+          </div>
+          <div class="step-note-wrap">
+            <div class="step-notes ${note ? 'visible' : ''}" id="note-${step.id}">
+              <textarea class="step-notes-input" rows="2" placeholder="Tulis catatan...">${note}</textarea>
+            </div>
+            <button class="step-add-note">${note ? '✎ Edit catatan' : '+ Tambah catatan'}</button>
+          </div>
+        </div>`;
+
+      const detailEl = document.createElement('div');
+      detailEl.className = 'step-detail' + (detailOpen ? ' open' : '');
+      detailEl.id = 'detail-' + step.id;
+      detailEl.innerHTML = `
+        <div class="detail-header">
+          <div class="detail-title">Instruksi Langkah ${step.id}</div>
+          <button class="detail-close">Tutup ✕</button>
+        </div>
+        <ul class="detail-list">${step.detail.map(d => `<li>${d}</li>`).join('')}</ul>`;
+
+      // checkbox
+      row.querySelector('.step-check').addEventListener('click', async e => {
+        e.stopPropagation();
+        const newVal = !sd.checked;
+        dbState[step.id] = { ...sd, checked: newVal };
+        render();
+        await saveStep(step.id, { checked: newVal });
+      });
+
+      // note toggle
+      row.querySelector('.step-add-note').addEventListener('click', e => {
+        e.stopPropagation();
+        const n = document.getElementById('note-' + step.id);
+        n.classList.toggle('visible');
+        if (n.classList.contains('visible')) n.querySelector('textarea').focus();
+      });
+
+      // note save — debounced
+      row.querySelector('.step-notes-input').addEventListener('input', e => {
+        e.stopPropagation();
+        const val = e.target.value;
+        clearTimeout(noteTimers[step.id]);
+        noteTimers[step.id] = setTimeout(() => {
+          dbState[step.id] = { ...dbState[step.id], note: val };
+          saveStep(step.id, { note: val });
+        }, 1000);
+      });
+      row.querySelector('.step-notes-input').addEventListener('click', e => e.stopPropagation());
+
+      // row click → toggle detail
+      row.addEventListener('click', () => {
+        if (openDetails.has(step.id)) { openDetails.delete(step.id); detailEl.classList.remove('open'); }
+        else { openDetails.add(step.id); detailEl.classList.add('open'); }
+      });
+
+      // detail close button
+      detailEl.querySelector('.detail-close').addEventListener('click', e => {
+        e.stopPropagation();
+        openDetails.delete(step.id);
+        detailEl.classList.remove('open');
+      });
+
+      wrap.appendChild(row);
+      wrap.appendChild(detailEl);
+    });
+
+    hdr.onclick = () => {
+      const nowOpen = wrap.classList.contains('open');
+      wrap.classList.toggle('open', !nowOpen);
+      hdr.classList.toggle('open', !nowOpen);
+      hdr.querySelector('.phase-chevron').classList.toggle('open', !nowOpen);
+    };
+
+    block.appendChild(hdr); block.appendChild(wrap); el.appendChild(block);
+  });
+}
+
+// ── MODAL ──
+function openModal() { document.getElementById('modalOverlay').classList.add('open'); document.getElementById('modalNote').value = ''; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+async function saveUpdate() {
+  currentUpdater = document.getElementById('modalWho').value;
+  const note = document.getElementById('modalNote').value.trim();
+  if (note) {
+    try { await sbInsert('tracker_updates', { who: currentUpdater, note }); } catch(e) {}
+  }
+  setSyncStatus('ok', `Update oleh ${currentUpdater}`);
+  closeModal();
+}
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+// ── INIT ──
+loadFromSupabase();
+
+// Auto-refresh setiap 30 detik (supaya kalau Jose update, Abbas lihat perubahan)
+setInterval(async () => {
+  try {
+    const rows = await sbGet('tracker_steps', '?order=id.asc');
+    dbState = {};
+    rows.forEach(r => { dbState[r.id] = { checked: r.checked, note: r.note, updated_by: r.updated_by, updated_at: r.updated_at }; });
+    render();
+  } catch(e) {}
+}, 30000);
+</script>
+</body>
+</html>
