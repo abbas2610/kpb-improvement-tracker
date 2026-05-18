@@ -260,68 +260,68 @@ const PHASES = [
   {
     name: "Setup akun & install Claude Code",
     steps: [
-      { id:1, title:"Buat akun GitHub, Supabase, Vercel", time:"30 menit", free:true,
-        desc:"Tiga fondasi project: GitHub = kode, Supabase = database, Vercel = hosting.",
-        detail:["Buka <strong>github.com</strong> → Sign up → buat repository private bernama <code>kpb-logistik-app</code>","Buka <strong>supabase.com</strong> → login pakai akun GitHub → New project → region Singapore → simpan database password","Buka <strong>vercel.com</strong> → Sign up with GitHub → akan dipakai nanti saat deploy"] },
+      { id:1, title:"Buat akun GitHub & Supabase", time:"30 menit", free:true,
+        desc:"Dua fondasi utama: GitHub = host HTML files + GitHub Pages, Supabase = database & storage foto.",
+        detail:["Buka <strong>github.com</strong> → Sign up → buat repository public bernama <code>kpb-logistik-app</code> (harus public untuk GitHub Pages gratis)","Buka <strong>supabase.com</strong> → login pakai akun GitHub → New project → region Singapore → simpan database password di tempat aman","Tidak perlu Vercel — GitHub Pages langsung jadi hosting, gratis selamanya","Di Supabase → Storage → New bucket bernama <code>surat-jalan</code> → set Public (supaya foto bisa diakses via URL)"] },
       { id:2, title:"Install Node.js & Claude Code", time:"15–30 menit", free:false,
-        desc:"Install Node.js lalu satu command untuk install Claude Code global.",
-        detail:["Download Node.js di <strong>nodejs.org</strong> → pilih versi LTS → install seperti software biasa","Buka terminal (Command Prompt di Windows / Terminal di Mac)","Jalankan: <code>npm install -g @anthropic-ai/claude-code</code>","Login: <code>claude login</code> → akan buka browser untuk autentikasi","Test: ketik <code>claude</code> di terminal → muncul prompt → setup selesai"] },
+        desc:"Install Node.js lalu satu command untuk install Claude Code global di komputer Jose.",
+        detail:["Download Node.js di <strong>nodejs.org</strong> → pilih versi LTS → install seperti software biasa","Buka terminal (Command Prompt di Windows / Terminal di Mac)","Jalankan: <code>npm install -g @anthropic-ai/claude-code</code>","Login: <code>claude login</code> → akan buka browser untuk autentikasi dengan akun Anthropic","Test: ketik <code>claude</code> di terminal → muncul prompt Claude Code → setup selesai"] },
       { id:3, title:"Test Claude Code — percobaan pertama", time:"15 menit", free:false,
         desc:"Validasi bahwa Claude Code bisa baca, tulis, dan jalankan perintah di komputer Jose.",
-        detail:["Buat folder: <code>mkdir test-project && cd test-project</code>","Ketik <code>claude</code> untuk masuk sesi","Instruksi: <em>'Buat file bernama hello.txt berisi teks: Selamat datang di KPB'</em>","Kalau file muncul di folder, setup sudah beres","Hapus folder test, lanjut ke Fase 2"] }
+        detail:["Buat folder: <code>mkdir test-project && cd test-project</code>","Ketik <code>claude</code> untuk masuk sesi","Instruksi: <em>'Buat file bernama hello.html berisi halaman sederhana bertuliskan Selamat datang KPB'</em>","Buka file di browser — kalau muncul, setup sudah beres","Hapus folder test, lanjut ke Fase 2"] }
     ]
   },
   {
-    name: "Init project & database schema",
+    name: "Setup struktur file & database",
     steps: [
-      { id:4, title:"Init project Next.js via Claude Code", time:"30–60 menit", free:false,
-        desc:"Claude Code generate project Next.js lengkap dengan Tailwind dan koneksi Supabase.",
-        detail:["Buat folder: <code>mkdir kpb-logistik-app && cd kpb-logistik-app</code>","Ketik <code>claude</code> untuk mulai sesi","Instruksi: <em>'Init project Next.js dengan Tailwind CSS dan App Router. Setup koneksi ke Supabase.'</em>","Masukkan SUPABASE_URL dan ANON_KEY saat diminta","Claude Code akan jalankan semua npm command dan buat file konfigurasi otomatis"] },
+      { id:4, title:"Buat struktur multi-file HTML via Claude Code", time:"1–2 jam", free:false,
+        desc:"Claude Code generate 8 file HTML terpisah per modul — mobile-friendly untuk lapangan, desktop untuk admin.",
+        detail:["Buat folder: <code>mkdir kpb-logistik-app && cd kpb-logistik-app</code>","Ketik <code>claude</code> untuk mulai sesi","Instruksi: <em>'Buat struktur project HTML multi-file untuk logistics app KPB. File yang dibutuhkan: index.html (login), rute.html (PPIC - desktop), kanban.html (PPIC - desktop), packing.html (Gudang - mobile), driver.html (Driver - mobile full), retur.html (Driver - mobile), cash.html (Driver - mobile), admin.html (Admin - desktop). Setiap file import Tailwind CSS dari CDN dan Supabase JS dari CDN.'</em>","Claude Code akan generate semua file sekaligus dengan struktur navigasi antar halaman"] },
       { id:5, title:"Generate database schema dari mockup", time:"1–2 jam", free:false,
-        desc:"Claude Code analisis mockup KPB v5.1 dan generate SQL schema untuk Supabase.",
-        detail:["Share file mockup KPB v5.1 ke Claude Code lalu instruksikan: <em>'Dari mockup ini, buatkan SQL schema PostgreSQL untuk Supabase.'</em>","Tabel wajib: <code>dokumen_rute</code>, <code>detail_rute</code>, <code>customer</code>, <code>produk</code>, <code>packing_list</code>, <code>loading_log</code>, <code>retur</code>, <code>cash_advance</code>, <code>notif_log</code>","Claude Code generate file <code>schema.sql</code> → paste di Supabase SQL Editor → Run","Verifikasi di Table Editor: semua tabel harus muncul"] },
-      { id:6, title:"Push ke GitHub & setup Vercel auto-deploy", time:"30 menit", free:false,
-        desc:"Claude Code jalankan git commands otomatis. App langsung live di URL sementara.",
-        detail:["Di Claude Code: <em>'Push project ini ke GitHub repo kpb-logistik-app. Init git, commit semua, push ke main.'</em>","Buka Vercel → New Project → Import from GitHub → pilih repo","Tambahkan Environment Variables (SUPABASE_URL dan ANON_KEY)","Deploy → tunggu 2–3 menit → app live di <code>kpb-logistik-app.vercel.app</code>"] }
+        desc:"Claude Code analisis mockup KPB v5.1 dan generate SQL schema lengkap untuk Supabase.",
+        detail:["Share file mockup KPB v5.1 ke Claude Code, instruksikan: <em>'Dari mockup ini, buatkan SQL schema PostgreSQL untuk Supabase. Sertakan semua tabel yang dibutuhkan beserta relasi dan index-nya.'</em>","Tabel wajib: <code>dokumen_rute</code>, <code>detail_rute</code>, <code>customer</code>, <code>produk</code>, <code>packing_list</code>, <code>loading_log</code>, <code>retur</code>, <code>cash_advance</code>, <code>notif_log</code>, <code>surat_jalan_foto</code>","Tabel <code>surat_jalan_foto</code> menyimpan: rute_id, driver_id, storage_path, telegram_sent, created_at","Claude Code generate file <code>schema.sql</code> → paste di Supabase SQL Editor → Run → verifikasi di Table Editor"] },
+      { id:6, title:"Push ke GitHub & aktifkan GitHub Pages", time:"20 menit", free:true,
+        desc:"Upload semua HTML ke GitHub, aktifkan Pages — app langsung live tanpa biaya hosting.",
+        detail:["Di Claude Code: <em>'Init git di folder ini, buat .gitignore, commit semua file HTML, push ke GitHub repo kpb-logistik-app.'</em>","Buka repo di github.com → Settings → Pages → Branch: main → Save","Tunggu 1–2 menit → app live di <code>https://[username].github.io/kpb-logistik-app</code>","Setiap update: Claude Code push ke GitHub → GitHub Pages otomatis update dalam 1–2 menit","Tidak perlu Vercel, tidak perlu build process, gratis selamanya"] }
     ]
   },
   {
-    name: "Build fitur dengan Claude Code",
+    name: "Build fitur & koneksi Supabase",
     steps: [
-      { id:7, title:"Build 7 modul aplikasi", time:"8–14 jam total", free:false,
-        desc:"Dokumen Rute, Kanban, Packing List, Driver View, Loading Log, Retur, Dashboard Admin.",
-        detail:["<strong>Modul 1 — Dokumen Rute:</strong> form buat rute baru, pilih driver & kendaraan, list customer + produk","<strong>Modul 2 — Kanban board:</strong> 4 kolom status rute, real-time update","<strong>Modul 3 — Packing checklist:</strong> centang per item, submit → update status","<strong>Modul 4 — Driver view:</strong> mobile-friendly, input retur + foto, cash advance","<strong>Modul 5 — Loading & departure log:</strong> timestamp loading & keberangkatan","<strong>Modul 6 — Retur management:</strong> input per customer, foto, approval PPIC","<strong>Modul 7 — Dashboard admin:</strong> ringkasan harian, status semua rute, log notif WA"] },
+      { id:7, title:"Build 8 modul HTML + koneksi data Supabase", time:"10–16 jam total", free:false,
+        desc:"Setiap file HTML disambungkan ke Supabase. Data real, bukan hardcoded. Mobile-first untuk modul lapangan.",
+        detail:["<strong>index.html — Login:</strong> Supabase Auth, redirect ke halaman sesuai role setelah login","<strong>rute.html — Dokumen Rute (desktop):</strong> form buat rute, pilih driver & kendaraan, tambah customer + produk per customer, simpan ke Supabase","<strong>kanban.html — Kanban (desktop):</strong> 4 kolom status rute real-time, drag atau klik untuk update status","<strong>packing.html — Packing Checklist (mobile):</strong> tampilan besar untuk gudang, centang per item, tombol submit loading","<strong>driver.html — Driver View (mobile full):</strong> halaman utama driver — list customer hari ini, tombol besar per aksi","<strong>retur.html — Input Retur (mobile):</strong> pilih customer, pilih produk, qty retur, <strong>upload foto surat jalan</strong> → simpan ke Supabase Storage → kirim ke Telegram","<strong>cash.html — Cash Advance (mobile):</strong> input nominal, keterangan, submit → notif Telegram ke finance","<strong>admin.html — Dashboard Admin (desktop):</strong> ringkasan harian, semua rute, log foto surat jalan, log notif Telegram"] },
       { id:8, title:"Setup autentikasi & role-based access", time:"2–3 jam", free:false,
-        desc:"Login dengan Supabase Auth. Tiga role: admin (PPIC), gudang, driver.",
-        detail:["Instruksi: <em>'Tambahkan login Supabase Auth. 3 role: admin, gudang, driver. Redirect ke halaman sesuai role. Buat middleware proteksi semua halaman.'</em>","Tambah Row Level Security di semua tabel","Test dengan 3 akun dummy berbeda role"] },
-      { id:9, title:"Integrasi notifikasi WhatsApp via Fonnte", time:"2–3 jam", free:false,
-        desc:"7 trigger WA otomatis untuk semua event penting di logistik KPB.",
-        detail:["Daftar di <strong>fonnte.com</strong>, scan QR dengan nomor WA KPB (~Rp50rb/bulan)","Copy API Key dari dashboard Fonnte","Instruksi: <em>'Buat modul notif WA via Fonnte. 7 trigger: rute baru, packing selesai, loading selesai, berangkat, retur, cash advance, rute selesai.'</em>","Tambah halaman log notifikasi di dashboard admin"] }
+        desc:"Login dengan Supabase Auth. Tiga role: admin (PPIC), gudang, driver. RLS di semua tabel.",
+        detail:["Instruksi ke Claude Code: <em>'Di index.html, tambahkan form login email & password dengan Supabase Auth. Setelah login berhasil, cek role user dari tabel profiles, redirect ke halaman sesuai: admin → kanban.html, gudang → packing.html, driver → driver.html.'</em>","Tambah Row Level Security (RLS) di semua tabel: driver hanya bisa lihat rute miliknya, gudang hanya bisa update packing & loading, admin bisa akses semua","Instruksi: <em>'Generate SQL RLS policy untuk semua tabel berdasarkan kolom role di tabel profiles.'</em>","Test dengan 3 akun dummy berbeda role — pastikan akses terbatas sesuai role"] },
+      { id:9, title:"Integrasi Telegram Bot — notif & foto surat jalan", time:"2–3 jam", free:true,
+        desc:"Telegram Bot gratis ganti Fonnte WA. Notif teks + foto surat jalan langsung dikirim ke grup KPB.",
+        detail:["Buka Telegram → cari <strong>@BotFather</strong> → kirim /newbot → ikuti instruksi → dapat Bot Token","Buat grup Telegram 'KPB Logistik Notif' → tambahkan bot ke grup → ambil Chat ID grup","Instruksi ke Claude Code: <em>'Buat file telegram.js berisi fungsi sendNotif(text) dan sendPhoto(photoBlob, caption). Gunakan Telegram Bot API dengan token ini: [token]. Chat ID grup: [id]. 7 trigger notif teks: rute dibuat, packing selesai, loading selesai, berangkat, retur, cash advance, rute selesai. Foto surat jalan dikirim via sendPhoto saat driver upload di retur.html.'</em>","Flow foto: driver ambil foto → browser compress ke max 1MB → upload ke Supabase Storage → URL foto dikirim ke Telegram sebagai photo dengan caption: Nama Driver | Customer | Nomor Rute | Timestamp","Gratis tanpa limit — Telegram Bot API tidak ada biaya apapun"] }
     ]
   },
   {
-    name: "Testing & production deploy",
+    name: "Testing & go-live",
     steps: [
       { id:10, title:"Bug fixing loop dengan Claude Code", time:"2–3 jam", free:false,
-        desc:"Paste error ke Claude Code — dia fix langsung di file yang tepat.",
-        detail:["Buka app → temukan error → kembali ke Claude Code","Paste error: <em>'Ada error ini: [paste]. Tolong fix.'</em>","Untuk error browser: <code>F12</code> → Console → copy pesan merah → paste ke Claude Code","Vercel auto-redeploy setiap ada perubahan → refresh browser untuk test ulang"] },
+        desc:"Paste error ke Claude Code — dia fix langsung di file HTML yang tepat, push otomatis.",
+        detail:["Buka app di browser → temukan error atau tampilan yang tidak sesuai","Kembali ke terminal Claude Code → paste pesan error: <em>'Di file retur.html ada error ini: [paste]. Tolong fix.'</em>","Untuk error di browser: tekan <code>F12</code> → tab Console → copy pesan merah → paste ke Claude Code","Claude Code edit file yang bersangkutan langsung → push ke GitHub → GitHub Pages update dalam 1–2 menit","Untuk bug tampilan mobile: screenshot dari HP → share ke Claude Code via claude.ai → minta fix CSS-nya"] },
       { id:11, title:"UAT bersama tim KPB", time:"2–3 jam", free:false,
-        desc:"Test skenario nyata bersama PPIC, tim gudang, dan satu driver.",
-        detail:["Undang 1 PPIC, 1 gudang, 1 driver untuk sesi testing","<strong>PPIC:</strong> buat Dokumen Rute → assign driver → cek notif WA diterima","<strong>Gudang:</strong> buka packing list → centang → submit → cek status kanban","<strong>Driver:</strong> buka di HP → lihat rute → input retur + foto → cash advance","Catat bug → fix via Claude Code → redeploy → test ulang"] },
+        desc:"Test skenario nyata: PPIC buat rute, gudang packing, driver input retur + foto surat jalan.",
+        detail:["Undang 1 PPIC, 1 gudang, 1 driver untuk sesi testing langsung","<strong>Skenario PPIC:</strong> login → buat Dokumen Rute → assign driver → cek notif Telegram diterima di grup","<strong>Skenario Gudang:</strong> login di HP → buka packing list → centang semua item → submit → cek status berubah di kanban","<strong>Skenario Driver:</strong> login di HP → lihat rute hari ini → selesai antar → buka retur.html → foto surat jalan → submit → cek foto muncul di grup Telegram KPB","Catat semua yang tidak berfungsi → fix via Claude Code → push → test ulang sampai semua skenario lancar"] },
       { id:12, title:"Custom domain (opsional)", time:"20 menit", free:false,
-        desc:"Ganti URL dari vercel.app ke domain KPB sendiri.",
-        detail:["Beli domain di Niagahoster (~Rp150rb/tahun)","Vercel → Settings → Domains → Add domain","Tambahkan CNAME record di panel domain","Tunggu propagasi 5–30 menit → domain aktif dengan HTTPS otomatis"] }
+        desc:"Ganti URL dari github.io ke domain KPB sendiri, misal app.kpb.co.id.",
+        detail:["Beli domain di Niagahoster atau Dewaweb (~Rp150rb/tahun untuk .id)","GitHub repo → Settings → Pages → Custom domain → isi domain → Save","Di panel domain registrar, tambahkan CNAME record ke <code>[username].github.io</code>","Tunggu propagasi DNS 5–30 menit → domain aktif dengan HTTPS otomatis via GitHub Pages"] }
     ]
   },
   {
-    name: "Go-live & onboarding tim",
+    name: "Onboarding tim & go-live",
     steps: [
-      { id:13, title:"Buat akun user & assign role", time:"30 menit", free:false,
-        desc:"Buat akun untuk setiap anggota tim KPB yang akan pakai aplikasi.",
-        detail:["Supabase → Authentication → Users → Invite user","Buat akun untuk PPIC, gudang, dan setiap driver","Update kolom <code>role</code> di tabel <code>profiles</code> untuk setiap user","Test login masing-masing akun → pastikan redirect ke halaman yang benar"] },
+      { id:13, title:"Buat akun user, setup Telegram grup & assign role", time:"45 menit", free:true,
+        desc:"Buat akun Supabase Auth per user, semua tim join grup Telegram KPB Logistik Notif.",
+        detail:["Supabase → Authentication → Users → Invite user — buat akun untuk semua PPIC, gudang, dan setiap driver","Update kolom <code>role</code> di tabel <code>profiles</code> untuk setiap user: <code>admin</code>, <code>gudang</code>, atau <code>driver</code>","Bagikan link grup Telegram 'KPB Logistik Notif' ke semua stakeholder yang perlu terima notifikasi","Share URL app ke masing-masing user sesuai role — minta save ke homescreen HP (Add to Home Screen) supaya terasa seperti app","Test: setiap user login → pastikan redirect ke halaman yang benar"] },
       { id:14, title:"Training & parallel run 1–2 minggu", time:"1–2 minggu", free:false,
-        desc:"Training per role, parallel run dulu sebelum full go-live.",
-        detail:["<strong>Training PPIC (30 mnt):</strong> buat rute, assign driver, monitor kanban","<strong>Training Gudang (30 mnt):</strong> packing list, centang, submit loading","<strong>Training Driver (20 mnt):</strong> login di HP, input retur + foto, cash advance","<strong>Minggu 1:</strong> app + proses lama berjalan bersamaan. Bandingkan data tiap hari.","<strong>Minggu 2:</strong> jika data konsisten, stop proses manual. App jadi sistem utama."] }
+        desc:"Training singkat per role, parallel run dulu sebelum matikan proses lama.",
+        detail:["<strong>Training PPIC (30 mnt):</strong> buat Dokumen Rute di rute.html, monitor status di kanban.html, lihat log foto di admin.html","<strong>Training Gudang (20 mnt):</strong> buka packing.html di HP, centang item, submit — tampilannya sudah mobile-friendly","<strong>Training Driver (20 mnt):</strong> login di HP, buka driver.html, cara input retur, cara foto & upload surat jalan, cara submit cash advance — pastikan notif Telegram muncul di grup","<strong>Minggu 1:</strong> app + proses lama (Excel/manual) jalan bersamaan. Foto surat jalan sudah wajib via app.","<strong>Minggu 2:</strong> jika data konsisten dan tim sudah nyaman, stop proses manual. App jadi sistem utama KPB."] }
     ]
   }
 ];
